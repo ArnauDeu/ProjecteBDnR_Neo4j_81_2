@@ -36,3 +36,9 @@ MERGE (p)-[:SAME_AS]-(i)
 return i,p
 
  - UNIO RELACIONS INDIVIDUALS
+
+LOAD CSV WITH HEADERS FROM 'file:///FAMILIA.csv' AS row
+WITH toInteger(row.ID_1) AS Ind1, toInteger(row.ID_2) AS Ind2, row.Relacio_Harmonitzada AS Relacio
+MATCH (p:Individual{Id:Ind1}),(i:Individual{Id:Ind2})
+MERGE (p)-[:Relacio]-(i)
+return i,p
