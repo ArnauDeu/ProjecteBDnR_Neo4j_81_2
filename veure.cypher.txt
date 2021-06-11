@@ -1,0 +1,38 @@
+ - MERGE 1 de INDIVIDUALS
+
+LOAD CSV WITH HEADERS FROM 'file:///Individual.csv' AS row
+WITH toInteger(row.Id) AS Id, row.name AS name, row.surname AS surname, row.second_surname AS second_surname, toInteger(row.Year) AS Year
+MERGE (I:Individual {Id: Id})
+  SET I.nom = name, I.cognom1 = surname, I.cognom2 = second_surname, I.naixement = Year;Aa
+
+ - MERGE 2 de Habitatges
+
+LOAD CSV WITH HEADERS FROM 'file:///Habitatges.csv' AS row
+WITH toInteger(row.Id_Llar) AS Id_Llar, row.Municipi AS Municipi, row.Carrer AS Carrer, toInteger(row.Numero) AS Numero, toInteger(row.Any_Padro) AS Any_Padro
+MERGE (H:Habitatges {Id_Llar: Id_Llar, Any_Padro: Any_Padro, Municipi: Municipi})
+  SET  H.Carrer = Carrer, H.Numero = Numero;
+
+ - CONSTRAINTS INDIVIDUAL
+
+CREATE CONSTRAINT Individual ON (i:Induvidual) ASSERT i.Id IS UNIQUE	
+
+ - CONSTRAINTS HABITATGES
+
+CREATE CONSTRAINT Habitatge ON (h:habitatge) ASSERT (h.Id_Llar, h.Any_Padro, h.Municipi) IS NODE KEY
+
+ - UNIO INDIVIDUALS i HABITATGES
+
+LOAD CSV WITH HEADERS FROM 'file:///VIU.csv' AS row
+WITH toInteger(row.IND) AS Ind, row.VIU AS VIU , row.Location AS Location, toInteger(row.Year) AS Year, toInteger(row.HOUSE_ID) AS House_Id
+MATCH (p:Habitatges{Any_Padro: Year, Id_Llar:House_Id, Municipi:Location}),(i:Individual{Id:Ind})
+MERGE (i)-[:VIU]->(p)
+return i,p
+
+ - UNIO SAME AS
+LOAD CSV WITH HEADERS FROM 'file:///same_as.csv' AS row
+WITH toInteger(row.ID_A) AS Ind1, toInteger(row.ID_B) AS Ind2
+MATCH (p:Individual{Id:Ind1}),(i:Individual{Id:Ind2})
+MERGE (p)-[:SAME_AS]-(i)
+return i,p
+
+ - UNIO RELACIONS INDIVIDUALS
